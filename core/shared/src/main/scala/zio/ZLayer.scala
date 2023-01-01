@@ -1835,6 +1835,14 @@ object ZLayer extends ZLayerCompanionVersionSpecific {
       )
 
     /**
+     * A named alias for `>>>`.
+     */
+    def to[RIn2, E1 >: E, ROut2](
+      that: => ZLayer[ROut with RIn2, E1, ROut2]
+    )(implicit tag: EnvironmentTag[ROut], trace: Trace): ZLayer[RIn with RIn2, E1, ROut2] =
+      >>>[RIn2, E1, ROut2](that)
+
+    /**
      * Feeds the output services of this layer into the input of the specified
      * layer, resulting in a new layer with the inputs of this layer as well as
      * any leftover inputs, and the outputs of the specified layer.
@@ -1843,6 +1851,14 @@ object ZLayer extends ZLayerCompanionVersionSpecific {
       trace: Trace
     ): ZLayer[RIn, E1, ROut2] =
       ZLayer.suspend(ZLayer.To(self, that))
+
+    /**
+     * A named alias for `>>>`.
+     */
+    def to[E1 >: E, ROut2](that: => ZLayer[ROut, E1, ROut2])(implicit
+      trace: Trace
+    ): ZLayer[RIn, E1, ROut2] =
+      >>>[E1, ROut2](that)
 
     /**
      * Feeds the output services of this layer into the input of the specified
@@ -1859,6 +1875,18 @@ object ZLayer extends ZLayerCompanionVersionSpecific {
       self ++ self.>>>[RIn2, E1, ROut2](that)
 
     /**
+     * A named alias for `>+>`.
+     */
+    def andTo[RIn2, E1 >: E, ROut2](
+      that: => ZLayer[ROut with RIn2, E1, ROut2]
+    )(implicit
+      tagged: EnvironmentTag[ROut],
+      tagged2: EnvironmentTag[ROut2],
+      trace: Trace
+    ): ZLayer[RIn with RIn2, E1, ROut with ROut2] =
+      >+>[RIn2, E1, ROut2](that)
+
+    /**
      * Feeds the output services of this layer into the input of the specified
      * layer, resulting in a new layer with the inputs of this layer, and the
      * outputs of both layers.
@@ -1870,5 +1898,17 @@ object ZLayer extends ZLayerCompanionVersionSpecific {
       trace: Trace
     ): ZLayer[RIn, E1, ROut1 with ROut2] =
       ZLayer.ZipWith[RIn, E1, ROut1, ROut2, ROut1 with ROut2](self, self >>> that, _.union[ROut2](_))
+
+    /**
+     * A named alias for `>+>`.
+     */
+    def andTo[E1 >: E, RIn2 >: ROut, ROut1 >: ROut, ROut2](
+      that: => ZLayer[RIn2, E1, ROut2]
+    )(implicit
+      tagged: EnvironmentTag[ROut2],
+      trace: Trace
+    ): ZLayer[RIn, E1, ROut1 with ROut2] =
+      >+>[E1, RIn2, ROut1, ROut2](that)
+
   }
 }
